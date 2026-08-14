@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+reports/*.json
+reports/*.html
+reports/*.png
+/tmp/agentlens_runs/
+.venv/
+venv/

@@ -1,0 +1,9 @@
+# Core (mock mode only needs pytest to run the test suite):
+pytest>=8.3.0
+
+# Needed only for AGENTLENS_LLM_PROVIDER=anthropic (real Claude calls):
+anthropic>=0.40.0
+python-dotenv>=1.0.1
+
+# Needed only for the optional interactive dashboard:
+streamlit>=1.38.0
