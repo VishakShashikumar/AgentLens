@@ -1,7 +1,4 @@
-<p align="center">
-  <img src="assets/lens.gif" width="96" height="96" alt="AgentLens logo: a magnifying glass scanning traced agent nodes">
-</p>
-
+# 🔍 AgentLens
 
 AgentLens profiles, evaluates, and optimizes other LLM agents. Point it at an
 agent and a set of benchmark tasks, and it traces every tool call and token,
