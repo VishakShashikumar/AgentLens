@@ -11,7 +11,7 @@ from __future__ import annotations
 from agentlens.agents import research_agent
 from agentlens.eval.checkers import check_redundant_tool_calls, check_excess_same_tool_calls
 from agentlens.eval.tasks import RESEARCH_TASKS
-from agentlens.llm.client import MockClient
+from agentlens.llm.client import get_client
 from agentlens.tracing.tracer import Trace
 
 
@@ -43,11 +43,19 @@ def narrate_trace(trace: Trace) -> None:
 
 
 def main() -> None:
-    client = MockClient()
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass  # fine in mock mode; needed only to auto-load ANTHROPIC_API_KEY from .env
+
+    client = get_client()
     task = next(t for t in RESEARCH_TASKS if t.id == "r2_eu_states_per_capita")
 
     print("=" * 72)
-    print("AGENTLENS DEMO — same task, run twice: before and after the fix")
+    print(f"AGENTLENS DEMO — provider: {type(client).__name__}")
+    print("same task, run twice: before and after the fix")
     print("=" * 72)
     print(f'\nThe task we\'re giving the agent: "{task.prompt}"\n')
 

@@ -75,7 +75,7 @@ def _propose_patch_llm(base_config: AgentConfig, report: DiagnosisReport, new_ve
     import anthropic
 
     client = anthropic.Anthropic()
-    model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+    model = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
 
     diagnosis_text = "\n".join(report.summary_lines())
     prompt = (

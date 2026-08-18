@@ -16,6 +16,7 @@ Two separate signals, deliberately kept apart:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Optional
 
@@ -27,8 +28,11 @@ JUDGE_SYSTEM_PROMPT = (
     "You are grading an AI agent's execution trace for efficiency. You will see how "
     "many tool calls it made, how many of those were redundant, and whether the task "
     "succeeded. Score quality from 0 to 1: reward correct, efficient completions; "
-    "penalize redundant tool calls and unnecessary verbosity. Respond with the score "
-    "and a one-sentence rationale."
+    "penalize redundant tool calls and unnecessary verbosity.\n\n"
+    "Respond with EXACTLY one line, no other text, in this exact format:\n"
+    "<score> | <one-sentence rationale>\n"
+    "where <score> is a number between 0.0 and 1.0. Example: 0.85 | Succeeded with one "
+    "redundant tool call."
 )
 
 
@@ -69,6 +73,26 @@ def _judge_policy_fn(trace: Trace, task_success: bool, ideal_call_count: int):
     return policy_fn
 
 
+def _parse_judge_response(text: Optional[str]) -> tuple[float, str]:
+    """Parse the judge's "<score> | <rationale>" line. Falls back to pulling
+    the first plausible 0-1 number out of the response if a real model
+    wraps the line in extra text, rather than than silently reporting 0.0
+    (which would misreport a formatting hiccup as a failed task)."""
+    text = (text or "").strip()
+    score_str, sep, rationale = text.partition(" | ")
+    if sep:
+        try:
+            return max(0.0, min(1.0, float(score_str.strip()))), rationale.strip()
+        except ValueError:
+            pass
+
+    match = re.search(r"\b(0(?:\.\d+)?|1(?:\.0+)?)\b", text)
+    if match:
+        return max(0.0, min(1.0, float(match.group(1)))), text or "(unparsed judge response)"
+
+    return 0.5, f"(could not parse judge response — got: {text[:120]!r})"
+
+
 def judge_trace(
     llm_client: LLMClient,
     trace: Trace,
@@ -89,11 +113,7 @@ def judge_trace(
         tools=[],
         policy_fn=policy_fn,
     )
-    score_str, _, rationale = (resp.text or "0.0 | no rationale").partition(" | ")
-    try:
-        score = float(score_str)
-    except ValueError:
-        score = 0.0
+    score, rationale = _parse_judge_response(resp.text)
 
     verdict = JudgeVerdict(
         task_id=trace.task_id, task_success=task_success, quality_score=score, rationale=rationale

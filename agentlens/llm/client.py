@@ -137,7 +137,7 @@ class AnthropicClient(LLMClient):
                 "or leave AGENTLENS_LLM_PROVIDER=mock to run without one."
             )
         self._client = anthropic.Anthropic(api_key=api_key)
-        self._model = model or os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+        self._model = model or os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
 
     def generate(
         self,
