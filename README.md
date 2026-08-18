@@ -158,3 +158,9 @@ reports/                  generated JSON + HTML reports (gitignored contents)
   exits non-zero on a quality regression, wired into a GitHub Action
 - A third target agent in a different domain, to test whether the same four
   patterns generalize or whether new ones show up
+
+  ## 👤 Contributor
+
+**Vishak Shashikumar**
+
+---
