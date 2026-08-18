@@ -48,20 +48,18 @@ repo — see "Why a mock provider?" below for what that means and doesn't mean.
 
 ## Architecture
 
-```
- target agents                tracer              eval harness            diagnosis            optimizer
-┌────────────────┐      ┌───────────────┐    ┌───────────────────┐   ┌──────────────────┐  ┌──────────────────┐
-│ research_agent  │      │ span-based    │    │ golden tasks       │   │ pattern detectors │  │ patches the      │
-│ (web_search,    │─────▶│ tracing of    │───▶│ + rule checks      │──▶│ (named taxonomy,  │─▶│ system prompt,   │
-│ calculator,     │      │ every tool +  │    │ + LLM-as-judge     │   │ ranked by impact) │  │ hands back v2    │
-│ save_note)      │      │ LLM call      │    │ efficiency score   │   └──────────────────┘  └────────┬─────────┘
-│                 │      └───────────────┘    └───────────────────┘                                   │
-│ coding_agent    │                                                                                     │
-│ (read/write/    │◀────────────────────────────── re-evaluate v2 against the same golden tasks ───────┘
-│ run_tests, on a │
-│ real seeded-bug │                        before/after numbers ──▶ report_html.py ──▶ report card (HTML)
-│ sandbox repo)   │
-└─────────────────┘
+```mermaid
+flowchart LR
+    TA["Target agents<br/>research_agent (web_search, calculator, save_note)<br/>coding_agent (read/write/run_tests on a real seeded-bug repo)"]
+    TR["Tracer<br/>span-based tracing of<br/>every tool + LLM call"]
+    EV["Eval harness<br/>golden tasks + rule checks<br/>+ LLM-as-judge efficiency score"]
+    DI["Diagnosis<br/>named failure-pattern taxonomy,<br/>ranked by impact"]
+    OP["Optimizer<br/>patches the system prompt,<br/>hands back v2"]
+    RPT["report_html.py<br/>→ report card (HTML)"]
+
+    TA --> TR --> EV --> DI --> OP
+    OP -- re-evaluate v2 on the same golden tasks --> TA
+    OP --> RPT
 ```
 
 Every LLM call in the system — target agents, the judge, the optimizer —
